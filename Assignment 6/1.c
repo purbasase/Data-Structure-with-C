@@ -9,96 +9,84 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-#define MAX 5 // Maximum size of the queue
+#define MAX 100  // Maximum size of the stack
 
-typedef struct Queue {
-    int items[MAX];
-    int front, rear;
-} Queue;
+// Stack structure
+struct Stack {
+    int arr[MAX];
+    int top;
+};
 
-// Function to create a queue and initialize its attributes
-Queue* createQueue() {
-    Queue* q = (Queue*)malloc(sizeof(Queue));
-    q->front = -1;
-    q->rear = -1;
-    return q;
+// Function to initialize the stack
+void initStack(struct Stack* s) {
+    s->top = -1;  // Stack is initially empty
 }
 
-// Check if the queue is full
-int isFull(Queue* q) {
-    return (q->rear == MAX - 1);
+// Function to check if the stack is full
+bool isFull(struct Stack* s) {
+    return s->top == MAX - 1;
 }
 
-// Check if the queue is empty
-int isEmpty(Queue* q) {
-    return (q->front == -1 || q->front > q->rear);
+// Function to check if the stack is empty
+bool isEmpty(struct Stack* s) {
+    return s->top == -1;
 }
 
-// Enqueue operation
-void enqueue(Queue* q, int value) {
-    if (isFull(q)) {
-        printf("Queue is full. Cannot enqueue %d\n", value);
-    } else {
-        if (q->front == -1) {
-            q->front = 0; // First element to be added
-        }
-        q->rear++;
-        q->items[q->rear] = value;
-        printf("Enqueued: %d\n", value);
+// Function to push an element onto the stack
+void push(struct Stack* s, int value) {
+    if (isFull(s)) {
+        printf("Stack overflow! Cannot push %d\n", value);
+        return;
     }
+    s->arr[++s->top] = value;
+    printf("%d pushed onto the stack\n", value);
 }
 
-// Dequeue operation
-int dequeue(Queue* q) {
-    if (isEmpty(q)) {
-        printf("Queue is empty. Cannot dequeue.\n");
-        return -1;
-    } else {
-        int item = q->items[q->front];
-        q->front++;
-        if (q->front > q->rear) {
-            // Reset the queue
-            q->front = -1;
-            q->rear = -1;
-        }
-        return item;
+// Function to pop an element from the stack
+int pop(struct Stack* s) {
+    if (isEmpty(s)) {
+        printf("Stack underflow! Cannot pop from empty stack\n");
+        return -1;  // Return -1 to indicate failure
     }
+    return s->arr[s->top--];
 }
 
-// Peep operation
-int peep(Queue* q) {
-    if (isEmpty(q)) {
-        printf("Queue is empty. No front element.\n");
-        return -1;
-    } else {
-        return q->items[q->front];
+// Function to peek at the top element of the stack
+int peek(struct Stack* s) {
+    if (isEmpty(s)) {
+        printf("Stack is empty! No top element\n");
+        return -1;  // Return -1 to indicate no element
     }
+    return s->arr[s->top];
 }
 
-// Display operation
-void display(Queue* q) {
-    if (isEmpty(q)) {
-        printf("Queue is empty.\n");
-    } else {
-        printf("Queue elements: ");
-        for (int i = q->front; i <= q->rear; i++) {
-            printf("%d ", q->items[i]);
-        }
-        printf("\n");
+// Function to display the elements of the stack
+void display(struct Stack* s) {
+    if (isEmpty(s)) {
+        printf("Stack is empty!\n");
+        return;
     }
+    printf("Stack elements: ");
+    for (int i = 0; i <= s->top; i++) {
+        printf("%d ", s->arr[i]);
+    }
+    printf("\n");
 }
 
-// Main function to drive the menu
+// Main function with menu-driven interface
 int main() {
-    Queue* q = createQueue();
+    struct Stack s;
+    initStack(&s);
+    
     int choice, value;
 
-    while (1) {
-        printf("\nQueue Menu:\n");
-        printf("1. Enqueue\n");
-        printf("2. Dequeue\n");
-        printf("3. Peep\n");
+    do {
+        printf("\nMenu:\n");
+        printf("1. Push\n");
+        printf("2. Pop\n");
+        printf("3. Peek\n");
         printf("4. Display\n");
         printf("5. Exit\n");
         printf("Enter your choice: ");
@@ -106,32 +94,32 @@ int main() {
 
         switch (choice) {
             case 1:
-                printf("Enter value to enqueue: ");
+                printf("Enter a value to push: ");
                 scanf("%d", &value);
-                enqueue(q, value);
+                push(&s, value);
                 break;
             case 2:
-                value = dequeue(q);
+                value = pop(&s);
                 if (value != -1) {
-                    printf("Dequeued: %d\n", value);
+                    printf("%d popped from the stack\n", value);
                 }
                 break;
             case 3:
-                value = peep(q);
+                value = peek(&s);
                 if (value != -1) {
-                    printf("Front element: %d\n", value);
+                    printf("Top element is: %d\n", value);
                 }
                 break;
             case 4:
-                display(q);
+                display(&s);
                 break;
             case 5:
-                free(q);
-                exit(0);
+                printf("Exiting...\n");
+                break;
             default:
-                printf("Invalid choice. Please try again.\n");
+                printf("Invalid choice! Please try again.\n");
         }
-    }
+    } while (choice != 5);
 
     return 0;
 }
