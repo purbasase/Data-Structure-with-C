@@ -11,104 +11,85 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Structure for a queue node
-typedef struct Node {
+// Node structure for the linked list
+struct Node {
     int data;
     struct Node* next;
-} Node;
+};
 
-// Structure for the queue
-typedef struct Queue {
-    Node* front;
-    Node* rear;
-} Queue;
+// Stack structure
+struct Stack {
+    struct Node* top;
+};
 
-// Function to create a new node
-Node* createNode(int value) {
-    Node* newNode = (Node*)malloc(sizeof(Node));
+// Function to initialize the stack
+void initStack(struct Stack* s) {
+    s->top = NULL;  // Stack is initially empty
+}
+
+// Function to check if the stack is empty
+int isEmpty(struct Stack* s) {
+    return s->top == NULL;
+}
+
+// Function to push an element onto the stack
+void push(struct Stack* s, int value) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
     newNode->data = value;
-    newNode->next = NULL;
-    return newNode;
+    newNode->next = s->top;  // Point new node to the previous top
+    s->top = newNode;         // Update top to the new node
+    printf("%d pushed onto the stack\n", value);
 }
 
-// Function to create a new queue
-Queue* createQueue() {
-    Queue* q = (Queue*)malloc(sizeof(Queue));
-    q->front = NULL;
-    q->rear = NULL;
-    return q;
-}
-
-// Check if the queue is empty
-int isEmpty(Queue* q) {
-    return (q->front == NULL);
-}
-
-// Enqueue operation
-void enqueue(Queue* q, int value) {
-    Node* newNode = createNode(value);
-    if (isEmpty(q)) {
-        q->front = newNode;
-        q->rear = newNode;
-    } else {
-        q->rear->next = newNode;
-        q->rear = newNode;
+// Function to pop an element from the stack
+int pop(struct Stack* s) {
+    if (isEmpty(s)) {
+        printf("Stack underflow! Cannot pop from empty stack\n");
+        return -1;  // Return -1 to indicate failure
     }
-    printf("Enqueued: %d\n", value);
+    struct Node* temp = s->top;
+    int poppedValue = temp->data; // Get the value to return
+    s->top = s->top->next;        // Move top to the next node
+    free(temp);                   // Free the old top node
+    return poppedValue;
 }
 
-// Dequeue operation
-int dequeue(Queue* q) {
-    if (isEmpty(q)) {
-        printf("Queue is empty. Cannot dequeue.\n");
-        return -1;
-    } else {
-        Node* temp = q->front;
-        int item = temp->data;
-        q->front = q->front->next;
-        if (q->front == NULL) {
-            q->rear = NULL; // Queue is now empty
-        }
-        free(temp);
-        return item;
+// Function to peek at the top element of the stack
+int peek(struct Stack* s) {
+    if (isEmpty(s)) {
+        printf("Stack is empty! No top element\n");
+        return -1;  // Return -1 to indicate no element
     }
+    return s->top->data;
 }
 
-// Peep operation
-int peep(Queue* q) {
-    if (isEmpty(q)) {
-        printf("Queue is empty. No front element.\n");
-        return -1;
-    } else {
-        return q->front->data;
+// Function to display the elements of the stack
+void display(struct Stack* s) {
+    if (isEmpty(s)) {
+        printf("Stack is empty!\n");
+        return;
     }
-}
-
-// Display operation
-void display(Queue* q) {
-    if (isEmpty(q)) {
-        printf("Queue is empty.\n");
-    } else {
-        Node* temp = q->front;
-        printf("Queue elements: ");
-        while (temp != NULL) {
-            printf("%d ", temp->data);
-            temp = temp->next;
-        }
-        printf("\n");
+    struct Node* current = s->top;
+    printf("Stack elements: ");
+    while (current != NULL) {
+        printf("%d ", current->data);
+        current = current->next;
     }
+    printf("\n");
 }
 
-// Main function to drive the menu
+// Main function with menu-driven interface
 int main() {
-    Queue* q = createQueue();
+    struct Stack s;
+    initStack(&s);
+    
     int choice, value;
 
-    while (1) {
-        printf("\nQueue Menu:\n");
-        printf("1. Enqueue\n");
-        printf("2. Dequeue\n");
-        printf("3. Peep\n");
+    do {
+        printf("\nMenu:\n");
+        printf("1. Push\n");
+        printf("2. Pop\n");
+        printf("3. Peek\n");
         printf("4. Display\n");
         printf("5. Exit\n");
         printf("Enter your choice: ");
@@ -116,36 +97,32 @@ int main() {
 
         switch (choice) {
             case 1:
-                printf("Enter value to enqueue: ");
+                printf("Enter a value to push: ");
                 scanf("%d", &value);
-                enqueue(q, value);
+                push(&s, value);
                 break;
             case 2:
-                value = dequeue(q);
+                value = pop(&s);
                 if (value != -1) {
-                    printf("Dequeued: %d\n", value);
+                    printf("%d popped from the stack\n", value);
                 }
                 break;
             case 3:
-                value = peep(q);
+                value = peek(&s);
                 if (value != -1) {
-                    printf("Front element: %d\n", value);
+                    printf("Top element is: %d\n", value);
                 }
                 break;
             case 4:
-                display(q);
+                display(&s);
                 break;
             case 5:
-                // Free the queue and its nodes
-                while (!isEmpty(q)) {
-                    dequeue(q);
-                }
-                free(q);
-                exit(0);
+                printf("Exiting...\n");
+                break;
             default:
-                printf("Invalid choice. Please try again.\n");
+                printf("Invalid choice! Please try again.\n");
         }
-    }
+    } while (choice != 5);
 
     return 0;
 }
